@@ -1,26 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 type QuizFormProps = {
-  onSubmit: (data: { question: string; userAnswer: string; correctAnswer: string; concept: string }) => void;
+  onSubmit: (data: {
+    question: string;
+    userAnswers: string[];
+    correctAnswers: string[];
+    concept: string;
+  }) => void;
 };
 
 export function QuizForm({ onSubmit }: QuizFormProps) {
-  const [question, setQuestion] = useState('');
-  const [userAnswer, setUserAnswer] = useState('');
-  const [correctAnswer, setCorrectAnswer] = useState('');
-  const [concept, setConcept] = useState('');
+  const [question, setQuestion] = useState("");
+  const [userAnswers, setUserAnswers] = useState<string[]>([""]);
+  const [correctAnswers, setCorrectAnswers] = useState<string[]>([""]);
+  const [concept, setConcept] = useState("");
+  const [mode, setMode] = useState<"oneQuestion" | "multiselect">(
+    "oneQuestion"
+  ); // Estado para alternar entre modos
+
+  const handleAnswerChange = (
+    index: number,
+    value: string,
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    const updatedAnswers = [...(mode === "multiselect" ? userAnswers : [])];
+    updatedAnswers[index] = value;
+    setter(updatedAnswers);
+  };
+
+  const handleAddAnswer = (
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    setter((prev) => [...prev, ""]);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ question, userAnswer, correctAnswer, concept });
-    setQuestion('');
-    setUserAnswer('');
-    setCorrectAnswer('');
-    setConcept('');
+    onSubmit({ question, userAnswers, correctAnswers, concept });
+    setQuestion("");
+    setUserAnswers([""]);
+    setCorrectAnswers([""]);
+    setConcept("");
   };
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-8">
+      <div className="tab-bar mb-6 flex gap-4">
+        <button
+          type="button"
+          className={`py-2 px-4 rounded-lg ${
+            mode === "oneQuestion" ? "bg-indigo-500 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setMode("oneQuestion")}
+        >
+          One Question
+        </button>
+        <button
+          type="button"
+          className={`py-2 px-4 rounded-lg ${
+            mode === "multiselect" ? "bg-indigo-500 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setMode("multiselect")}
+        >
+          Multiselect
+        </button>
+      </div>
+
       <div className="space-y-6">
         <div>
           <label
@@ -41,39 +86,63 @@ export function QuizForm({ onSubmit }: QuizFormProps) {
         </div>
 
         <div>
-          <label
-            htmlFor="userAnswer"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Your Answer
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Your {mode === "oneQuestion" ? "Answer" : "Answers"}
           </label>
-          <input
-            id="userAnswer"
-            type="text"
-            value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
-            required
-            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3"
-            placeholder="Enter your answer"
-          />
+          {userAnswers.map((answer, index) => (
+            <input
+              key={index}
+              type="text"
+              value={answer}
+              onChange={(e) =>
+                handleAnswerChange(index, e.target.value, setUserAnswers)
+              }
+              required
+              className="w-full mb-2 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3"
+              placeholder={`Enter ${
+                mode === "oneQuestion" ? "an" : "another"
+              } answer`}
+            />
+          ))}
+          {mode === "multiselect" && (
+            <button
+              type="button"
+              onClick={() => handleAddAnswer(setUserAnswers)}
+              className="text-indigo-500 hover:underline"
+            >
+              Add another answer
+            </button>
+          )}
         </div>
 
         <div>
-          <label
-            htmlFor="correctAnswer"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Correct Answer
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Correct {mode === "oneQuestion" ? "Answer" : "Answers"}
           </label>
-          <input
-            id="correctAnswer"
-            type="text"
-            value={correctAnswer}
-            onChange={(e) => setCorrectAnswer(e.target.value)}
-            required
-            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3"
-            placeholder="Enter the correct answer"
-          />
+          {correctAnswers.map((answer, index) => (
+            <input
+              key={index}
+              type="text"
+              value={answer}
+              onChange={(e) =>
+                handleAnswerChange(index, e.target.value, setCorrectAnswers)
+              }
+              required
+              className="w-full mb-2 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3"
+              placeholder={`Enter ${
+                mode === "oneQuestion" ? "the" : "another correct"
+              } answer`}
+            />
+          ))}
+          {mode === "multiselect" && (
+            <button
+              type="button"
+              onClick={() => handleAddAnswer(setCorrectAnswers)}
+              className="text-indigo-500 hover:underline"
+            >
+              Add another correct answer
+            </button>
+          )}
         </div>
 
         <div>
@@ -93,7 +162,7 @@ export function QuizForm({ onSubmit }: QuizFormProps) {
             placeholder="Explain the concept or definition behind this question"
           />
         </div>
-        
+
         <button
           type="submit"
           className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-medium"
