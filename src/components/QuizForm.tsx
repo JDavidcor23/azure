@@ -9,7 +9,7 @@ type QuizFormProps = {
   }) => void;
 };
 
-export function QuizForm({ onSubmit }: QuizFormProps) {
+export function QuizForm({ onSubmit }: Readonly<QuizFormProps>) {
   const [question, setQuestion] = useState("");
   const [userAnswers, setUserAnswers] = useState<string[]>([""]);
   const [correctAnswers, setCorrectAnswers] = useState<string[]>([""]);
@@ -34,14 +34,26 @@ export function QuizForm({ onSubmit }: QuizFormProps) {
     setter((prev) => [...prev, ""]);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({ question, userAnswers, correctAnswers, concept });
-    setQuestion("");
-    setUserAnswers([""]);
-    setCorrectAnswers([""]);
-    setConcept("");
-  };
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  const answers = mode === "oneQuestion" ? [userAnswers[0] || ""] : userAnswers;
+  const corrects =
+    mode === "oneQuestion" ? [correctAnswers[0] || ""] : correctAnswers;
+
+  onSubmit({
+    question,
+    userAnswers: answers,
+    correctAnswers: corrects,
+    concept,
+  });
+
+  setQuestion("");
+  setUserAnswers([""]);
+  setCorrectAnswers([""]);
+  setConcept("");
+};
+
+
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-8">
@@ -91,7 +103,7 @@ export function QuizForm({ onSubmit }: QuizFormProps) {
           </label>
           {userAnswers.map((answer, index) => (
             <input
-              key={index}
+              key={answer}
               type="text"
               value={answer}
               onChange={(e) =>
@@ -121,7 +133,7 @@ export function QuizForm({ onSubmit }: QuizFormProps) {
           </label>
           {correctAnswers.map((answer, index) => (
             <input
-              key={index}
+              key={answer}
               type="text"
               value={answer}
               onChange={(e) =>

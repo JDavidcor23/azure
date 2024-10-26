@@ -1,19 +1,24 @@
-import React, { useState } from 'react';
-import { Pencil, Check, X } from 'lucide-react';
-import { QuizEntry } from '../types/quiz';
+import { useState } from "react";
+import { Pencil, Check, X } from "lucide-react";
+import { QuizEntry } from "../types/quiz";
 
 type EntryListProps = {
   entries: QuizEntry[];
-  type: 'success' | 'errors';
-  onUpdateConcept?: (timestamp: number, newConcept: string, type: 'success' | 'errors') => void;
+  type: "success" | "errors";
+  onUpdateConcept?: (
+    timestamp: number,
+    newConcept: string,
+    type: "success" | "errors"
+  ) => void;
 };
 
-export function EntryList({ entries, type, onUpdateConcept }: EntryListProps) {
+export function EntryList({ entries, type, onUpdateConcept }: Readonly<EntryListProps>) {
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editedConcept, setEditedConcept] = useState('');
-  
-  const borderColor = type === 'success' ? 'border-green-500' : 'border-red-500';
-  const answerColor = type === 'success' ? 'text-green-600' : 'text-red-600';
+  const [editedConcept, setEditedConcept] = useState("");
+
+  const borderColor =
+    type === "success" ? "border-green-500" : "border-red-500";
+  const answerColor = type === "success" ? "text-green-600" : "text-red-600";
 
   const handleEdit = (entry: QuizEntry) => {
     setEditingId(entry.timestamp);
@@ -29,13 +34,13 @@ export function EntryList({ entries, type, onUpdateConcept }: EntryListProps) {
 
   const handleCancel = () => {
     setEditingId(null);
-    setEditedConcept('');
+    setEditedConcept("");
   };
 
   if (entries.length === 0) {
     return (
       <p className="text-center text-gray-500">
-        No {type === 'success' ? 'correct' : 'incorrect'} answers yet
+        No {type === "success" ? "correct" : "incorrect"} answers yet
       </p>
     );
   }
@@ -47,7 +52,9 @@ export function EntryList({ entries, type, onUpdateConcept }: EntryListProps) {
           key={entry.timestamp}
           className={`bg-white rounded-xl shadow-sm p-6 border-l-4 ${borderColor}`}
         >
-          <h3 className="font-medium text-gray-900 mb-2">Question: {entry.question}</h3>
+          <h3 className="font-medium text-gray-900 mb-2">
+            Question: {entry.question}
+          </h3>
           <div className="bg-gray-50 rounded-lg p-4 mb-3">
             <div className="flex justify-between items-center mb-2">
               <h4 className="text-sm font-medium text-gray-700">Concept:</h4>
@@ -91,8 +98,33 @@ export function EntryList({ entries, type, onUpdateConcept }: EntryListProps) {
               <p className="text-sm text-gray-600 mt-1">{entry.concept}</p>
             )}
           </div>
-          <p className="text-sm text-gray-600">Your Answer: {entry.userAnswer}</p>
-          <p className={`text-sm ${answerColor}`}>Correct Answer: {entry.correctAnswer}</p>
+          <p className="text-sm text-gray-600">
+            Your Answer: {entry.userAnswer}
+            {Array.isArray(entry.userAnswers) ? (
+              <ul className="list-disc list-inside">
+                {entry.userAnswers.map((answer) => (
+                  <li key={answer}>{answer}</li>
+                ))}
+              </ul>
+            ) : (
+              ` ${entry.userAnswer}`
+            )}
+          </p>
+
+          {/* Manejando correctAnswer como un string o array */}
+          <p className={`text-sm ${answerColor}`}>
+            Correct Answer:
+            {Array.isArray(entry.correctAnswers) ? (
+              <ul className="list-disc list-inside">
+                {entry.correctAnswers.map((answer) => (
+                  <li key={answer}>{answer}</li>
+                ))}
+              </ul>
+            ) : (
+              ` ${entry.correctAnswer}`
+            )}
+          </p>
+
           <p className="text-xs text-gray-400 mt-2">
             {new Date(entry.timestamp).toLocaleString()}
           </p>

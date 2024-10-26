@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { QuizEntry } from '../types/quiz';
+import { useState, useEffect } from "react";
+import { QuizEntry } from "../types/quiz";
 
-const STORAGE_KEY = 'quiz_entries';
+const STORAGE_KEY = "quiz_entries";
 
 export function useQuizStorage() {
   const [successEntries, setSuccessEntries] = useState<QuizEntry[]>([]);
@@ -22,25 +22,46 @@ export function useQuizStorage() {
     setErrorEntries(errors);
   };
 
-  const addEntry = (entry: Omit<QuizEntry, 'timestamp'>) => {
+  const addEntry = (entry: Omit<QuizEntry, "timestamp">) => {
     const fullEntry = { ...entry, timestamp: Date.now() };
-    
-    if (entry.userAnswer.toLowerCase().trim() === entry.correctAnswer.toLowerCase().trim()) {
+
+    const normalize = (value: string | undefined) =>
+      (value ?? "").trim().toLowerCase();
+
+    const isCorrect = Array.isArray(entry.userAnswer)
+      ? entry.userAnswer.some(
+          (answer) =>
+            Array.isArray(entry.correctAnswer) &&
+            entry.correctAnswer.some(
+              (correct) => normalize(answer) === normalize(correct)
+            )
+        )
+      : normalize(entry.userAnswer) === normalize(entry.correctAnswer);
+
+    if (isCorrect) {
       saveEntries([...successEntries, fullEntry], errorEntries);
     } else {
       saveEntries(successEntries, [...errorEntries, fullEntry]);
     }
   };
 
-  const updateConcept = (timestamp: number, newConcept: string, type: 'success' | 'errors') => {
-    if (type === 'success') {
-      const updatedEntries = successEntries.map(entry =>
-        entry.timestamp === timestamp ? { ...entry, concept: newConcept } : entry
+  const updateConcept = (
+    timestamp: number,
+    newConcept: string,
+    type: "success" | "errors"
+  ) => {
+    if (type === "success") {
+      const updatedEntries = successEntries.map((entry) =>
+        entry.timestamp === timestamp
+          ? { ...entry, concept: newConcept }
+          : entry
       );
       saveEntries(updatedEntries, errorEntries);
     } else {
-      const updatedEntries = errorEntries.map(entry =>
-        entry.timestamp === timestamp ? { ...entry, concept: newConcept } : entry
+      const updatedEntries = errorEntries.map((entry) =>
+        entry.timestamp === timestamp
+          ? { ...entry, concept: newConcept }
+          : entry
       );
       saveEntries(successEntries, updatedEntries);
     }
@@ -50,6 +71,6 @@ export function useQuizStorage() {
     successEntries,
     errorEntries,
     addEntry,
-    updateConcept
+    updateConcept,
   };
 }

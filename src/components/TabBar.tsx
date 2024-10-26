@@ -1,13 +1,12 @@
-import React from 'react';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { TabType } from '../types/quiz';
 
-type TabBarProps = {
+type TabBarProps = Readonly<{
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
   successCount: number;
   errorCount: number;
-};
+}>;
 
 export function TabBar({ activeTab, onTabChange, successCount, errorCount }: TabBarProps) {
   return (

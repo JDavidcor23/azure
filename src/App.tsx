@@ -13,7 +13,7 @@ function App() {
 
   // Función para descargar datos del localStorage en formato JSON
   const downloadQuiz = () => {
-    const data = localStorage.getItem("quiz_entries") || "[]";
+    const data = localStorage.getItem("quiz_entries") ?? "[]";
     const blob = new Blob([data], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
