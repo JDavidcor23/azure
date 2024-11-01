@@ -84,7 +84,10 @@ export const Home = () => {
             <h2 className="text-xl font-semibold mb-4 text-purple-400">
               Add New Question
             </h2>
-            <QuestionForm onSave={handleSaveQuestion} />
+            <QuestionForm
+              onSave={handleSaveQuestion}
+              existingQuestions={questions}
+            />
           </div>
 
           <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700">

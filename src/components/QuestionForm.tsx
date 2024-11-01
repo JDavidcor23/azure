@@ -1,21 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Question, QuestionType } from "../types";
 
 interface QuestionFormProps {
   onSave: (question: Question) => void;
+  existingQuestions: Question[];
 }
 
-const QuestionForm: React.FC<QuestionFormProps> = ({ onSave }) => {
+const QuestionForm: React.FC<QuestionFormProps> = ({
+  onSave,
+  existingQuestions,
+}) => {
   const [type, setType] = useState<QuestionType>("single");
   const [question, setQuestion] = useState("");
+  const [isDuplicate, setIsDuplicate] = useState(false); // Verifica duplicados
   const [possibleAnswers, setPossibleAnswers] = useState<string[]>([""]);
   const [correctAnswers, setCorrectAnswers] = useState<string[]>([""]);
   const [links, setLinks] = useState<string[]>([""]);
   const [concept, setConcept] = useState("");
 
+  useEffect(() => {
+    // Verifica si la pregunta ya existe ignorando mayúsculas/minúsculas
+    const duplicate = existingQuestions.some(
+      (q: Question) => q.question.toLowerCase() === question.toLowerCase()
+    );
+    setIsDuplicate(duplicate);
+  }, [question, existingQuestions]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDuplicate) {
+      alert("Esta pregunta ya existe. Por favor, escribe otra.");
+      return;
+    }
     const newQuestion: Question = {
       type,
       question,
@@ -35,6 +52,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onSave }) => {
     setCorrectAnswers([""]);
     setLinks([""]);
     setConcept("");
+    setIsDuplicate(false);
   };
 
   const handleArrayInput = (
@@ -112,13 +130,24 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onSave }) => {
         <label className="block text-sm font-medium text-purple-300">
           Question
         </label>
-        <input
-          type="text"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-3"
-          required
-        />
+        <div className="flex">
+          <input
+            type="text"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-3"
+            required
+          />
+          {isDuplicate && (
+            <button
+              type="button"
+              onClick={() => setQuestion("")}
+              className="p-2 text-red-400 hover:text-red-300"
+            >
+              <X size={20} />
+            </button>
+          )}
+        </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-purple-300">
@@ -203,6 +232,18 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onSave }) => {
 
       <div>
         <label className="block text-sm font-medium text-purple-300">
+          Concept
+        </label>
+        <textarea
+          value={concept}
+          onChange={(e) => setConcept(e.target.value)}
+          className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-3"
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-purple-300">
           Links
         </label>
         {links.map((link, index) => (
@@ -231,18 +272,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onSave }) => {
         >
           <Plus size={20} /> Add Link
         </button>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-purple-300">
-          Concept
-        </label>
-        <textarea
-          value={concept}
-          onChange={(e) => setConcept(e.target.value)}
-          className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-3"
-          rows={3}
-        />
       </div>
 
       <button

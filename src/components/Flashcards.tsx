@@ -35,20 +35,20 @@ export const Flashcard: React.FC<FlashcardProps> = ({
         </div>
       ) : (
         <div className="back flex flex-col gap-5">
-          <h4 className="text-lg">- Concept</h4>
-          <p>{concept}</p>
           {correctAnswers.length > 0 && (
             <div className="flex flex-col gap-2 items-center">
               <h4>- Correct Answer{correctAnswers.length > 1 && "s"}</h4>
               <ul>
                 {correctAnswers.map((answer, index) => (
-                  <li key={index} className="text-purple-400">
+                  <li key={index} className="text-purple-400 text-xl font-bold">
                     {answer}
                   </li>
                 ))}
               </ul>
             </div>
           )}
+          <h4 className="text-lg">- Concept</h4>
+          <p>{concept}</p>
           {links.map((link, index) => (
             <a
               key={index}
